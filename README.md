@@ -1,112 +1,50 @@
-# Smart-Security-Camera
-IoT Raspberry Pi security camera running open-cv for object detection. The camera will send an email with an image of any objects it detects. It also runs a server that provides a live video stream over the internet.
+# Raspberry Pi Smart Security Camera integrated with Ultrasonic and Light sensor
+In this project, we are implementing on the security camera integrated with ultrasonic and light sensor. The objective of this project is to capture an image when there is any motion is detected in the areas. Besides, ultrasonic is used to detect any obstacle with the effect range up to 4.5 meter, when there is any obstacle detected then the camera will be started to capture the motion. The reason to do this because ultrasonic draw lower current than camera, which mean it can achieve power saving.
 
-[Watch the original video here](https://youtu.be/Y2QFu-tTvTI)
+## System Design
+Hardware:
+- Raspberry Pi 3 Model B
+- Grove Pi
+- Micro SD card
+- Pi Camera Module V2
+- Ultrasonic Sensor HC-SR04
+- Grove Light Sensor 1.2
+- LED Light Bulb
 
-## Setup
+Software:
+- Raspbian
+- Python 3
+- Firebase
+- Gmail
 
-This project uses a Raspberry Pi Camera to stream video. Before running the code, make sure to configure the raspberry pi camera on your device.
+## Functional/Modules Description
+1. Image Capture by Motion Detection
+    Pi will turn into a dedicated security camera that can monitor a connected camera to look for motion and periodically capture images. In addition, to detect the motion with the Pi camera, we use the motion software package provided from lavrsen.dk website.
+    
+2. Ultrasonic Object Range Detection
+    The ultrasonic used to measure the distance to an object up to 4.5 meter by ultrasound. So, if there is an object come near, this module will start the Pi camera to capture the motion. The reason is ultrasonic draw lower current than camera and the camera do not require to 24 hour operating.
+    
+3. Light Sensor Detection
+    The light sensor integrates a photo-resistor to detect the intensity of light. When the environment is dark, it will light up the LED bulb to provide sufficient light to the Pi camera (without IR) to capture a clear image.
+    
+4. Upload Image to Firebase Cloud
+    Firstly, connect the Raspberry Pi with the Firebase through the Firebase API. When the security camera which using OpenCV has detecting a moving objects, it will automatically upload and store into Firebase Database. Thus, user can be easily view the images from the web browser or mobile devices.
+    
+5. Email Notification
+    While the images have been uploaded to the Firebase, it will also use Gmail SMTP to send an email with images attached to user.
+    
+# Sample Screenshot
 
-Open the terminal and run
+![alt text](https://s22.postimg.cc/vrf06m775/image.jpg) </br>
+Figure 1: System built</br></br>
+![alt text](https://s22.postimg.cc/bwsykif4x/image.jpg) </br>
+Figure 2: User received email with images attached</br></br>
+![alt text](https://s22.postimg.cc/6y5g5zqrl/image.jpg)</br>
+Figure 3: Web browser to view all images from Database</br></br>
+![alt text](https://s22.postimg.cc/f3ni44rv5/image.jpg)</br>
+Figure 4: Firebase Database </br></br>
+![alt text](https://s22.postimg.cc/68mntlvcx/image.jpg)</br>
+Figure 5: Light sensor reading</br></br>
+![alt text](https://s22.postimg.cc/4gtoypz5d/image.jpg)</br>
+Figure 6: Ultrasonic distance reading</br>
 
-```
-sudo raspi-config
-```
-
-Select `Interface Options`, then `Pi Camera` and toggle on. Press `Finish` and exit.
-
-You can verify that the camera works by running
-
-```
-raspistill -o image.jpg
-```
-which will save a image from the camera in your current directory. You can open up the file inspector and view the image.
-
-## Installing Dependencies
-
-This project uses openCV to detect objects in the video feed. You can install openCV by using the following [tutorial](http://www.pyimagesearch.com/2016/04/18/install-guide-raspberry-pi-3-raspbian-jessie-opencv-3/). I used the Python 2.7 version of the tutorial.
-
-The installation took almost 8 hours (!!) on my Raspberry Pi Zero, but it would be considerably faster on a more powerful board like the Raspberry Pi 3.
-
-The tutorial will prompt you to create a virtual environment. Make sure you are using the virtual environment by typing the following commands
-
-```bash
-source ~/.profile
-workon cv
-```
-
-Next, navigate to the repository directory
-
-```
-cd Smart-Security-Camera
-```
-
-and install the dependencies for the project
-
-```
-pip install -r requirements.txt
-```
-
-*Note: If you're running python3, you'll have to change the import statements at the top of the mail.py file*
-
-```
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-```
-*and change your print statements from quotes to parenthesis*
-
-```
-print "" => print()
-```
-
-## Customization
-
-To get emails when objects are detected, you'll need to make a couple modifications to the `mail.py` file.
-
-Open `mail.py` with vim `vim mail.py`, then press `i` to edit. Scroll down to the following section
-
-```
-# Email you want to send the update from (only works with gmail)
-fromEmail = 'myemail@gmail.com'
-fromEmailPassword = 'password1234'
-
-# Email you want to send the update to
-toEmail = 'anotheremail@gmail.com'
-```
-and replace with your own email/credentials. The `mail.py` file logs into a gmail SMTP server and sends an email with an image of the object detected by the security camera. 
-
-Press `esc` then `ZZ` to save and exit.
-
-You can also modify the `main.py` file to change some other properties.
-
-```
-email_update_interval = 600 # sends an email only once in this time interval
-video_camera = VideoCamera(flip=True) # creates a camera object, flip vertically
-object_classifier = cv2.CascadeClassifier("models/fullbody_recognition_model.xml") # an opencv classifier
-```
-Notably, you can use a different object detector by changing the path `"models/fullbody_recognition_model.xml"` in `object_classifier = cv2.CascadeClassifier("models/fullbody_recognition_model.xml")`.
-
-to a new model in the models directory.
-
-```
-facial_recognition_model.xml
-fullbody_recognition_model.xml
-upperbody_recognition_model.xml
-```
-
-## Running the Program
-
-Run the program
-
-```
-python main.py
-```
-
-You can view a live stream by visiting the ip address of your pi in a browser on the same network. You can find the ip address of your Raspberry Pi by typing `ifconfig` in the terminal and looking for the `inet` address. 
-
-Visit `<raspberrypi_ip>:5000` in your browser to view the stream.
-
-Note: To view the live stream on a different network than your Raspberry Pi, you can use [ngrok](https://ngrok.com/) to expose a local tunnel. Once downloaded, run ngrok with `./ngrok http 5000` and visit one of the generated links in your browser.
-
-Note: The video stream will not start automatically on startup. To start the video stream automatically, you will need to run the program  from your `/etc/rc.local` file see this [video](https://youtu.be/51dg2MsYHns?t=7m4s) for more information about how to configure that.
