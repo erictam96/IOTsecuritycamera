@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<script src="firebase.js"></script>
+<script src="firebase.js"></script>
+
+<script>
+window.addEventListener('load',function setup(){
+   var config = {
+    apiKey: "AIzaSyCh5gJt5Z94ZBVnM4iScsmPFNHgnf-Jhao",
+    authDomain: "smartsecurity-229ca.firebaseapp.com",
+    databaseURL: "https://smartsecurity-229ca.firebaseio.com",
+    projectId: "smartsecurity-229ca",
+    storageBucket: "smartsecurity-229ca.appspot.com",
+    messagingSenderId: "538784603187"
+  };
+  firebase.initializeApp(config);
+  database = firebase.database();
+ 
+  var ref = database.ref('Security');
+  ref.on('value',gotData,errData);
+});
+
+function gotData(data){
+  var dataLists = document.querySelectorAll('.dataList');
+  for(var i=0; i< dataLists.length; i++){
+     dataLists[i].remove();
+  }
+  var attend = data.val();
+  var keys = Object.keys(attend);
+  for(var i=0; i<keys.length; i++){
+  var k = keys[i];
+  var str=attend[k].Image;
+  var substringimg=str.substring(2, str.length-1);
+  
+  var tr = document.createElement('tr');
+  tr.className = 'dataList';
+  var td = document.createElement('td');
+
+  var image = new Image();
+  image.src = "data:image/png;base64,"+substringimg;
+  td.appendChild(image);
+  tr.appendChild(td);
+					
+  var td1 = document.createElement('td');
+  var newElem = document.createElement("input");
+  newElem.setAttribute("title", attend[k].Date);
+  newElem.setAttribute("type", "text");
+  newElem.setAttribute("value", attend[k].Date);
+  newElem.setAttribute("readonly", "readonly");
+  newElem.style.border="none";
+  td1.appendChild(newElem);
+  tr.appendChild(td1);
+  
+  
+  var td2 = document.createElement('td');
+  var newElem = document.createElement("input");
+  newElem.setAttribute("title", attend[k].Time);
+  newElem.setAttribute("type", "text");
+  newElem.setAttribute("value", attend[k].Time);
+  newElem.setAttribute("readonly", "readonly");
+  newElem.style.border="none";
+  td2.appendChild(newElem);
+  tr.appendChild(td2);
+  
+					
+  //continue declare td2 for date and td3 for time
+					
+  //rmb put Id for table
+  document.getElementById('table').appendChild(tr);
+  
+}
+ 
+}
+
+function errData(err){
+  console.log("Error!!!");
+  console.log(err);
+}
+</script>
+
+<title>Untitled 1</title>
+</head>
+
+<body>
+<h1> Home Security </h1>
+
+<div class="container" align="center" width="500px">
+<h4>Alert !!</h4>
+<table id="table" border="1" >
+     <tr>
+         <th>Image</th>
+         <th>Date</th>
+         <th>Time</th>
+     </tr>
+</table>
+</div>
+
+
+</body>
+
+</html>
